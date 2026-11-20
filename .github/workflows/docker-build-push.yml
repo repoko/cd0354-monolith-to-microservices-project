@@ -1,0 +1,35 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build images
+        run: |
+          docker build -t reverseproxy ./udagram-reverseproxy
+          docker build -t udagram-api-user ./udagram-api-user
+          docker build -t udagram-api-feed ./udagram-api-feed
+          docker build -t udagram-frontend ./udagram-frontend
+
+      - name: Tag and push images
+        run: |
+          USER=${{ secrets.DOCKER_USERNAME }}
+          TAG=v${{ github.run_number }}
+          for IMG in reverseproxy udagram-api-user udagram-api-feed udagram-frontend; do
+            docker tag $IMG $USER/$IMG:$TAG
+            docker tag $IMG $USER/$IMG:latest
+            docker push $USER/$IMG:$TAG
+            docker push $USER/$IMG:latest
+          done
