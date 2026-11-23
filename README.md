@@ -84,3 +84,32 @@ Launch the frontend app locally.
     ```
 4. `set_env.sh` is really for your backend application. Frontend applications have a different notion of how to store configurations. Configurations for the application endpoints can be configured inside of the `environments/environment.*ts` files.
 5. In `set_env.sh`, environment variables are set with `export $VAR=value`. Setting it this way is not permanent; every time you open a new terminal, you will have to run `set_env.sh` to reconfigure your environment variables. To verify if your environment variable is set, you can check the variable with a command like `echo $POSTGRES_USERNAME`.
+
+---
+
+## Submission Notes – Tools Used and Alternatives
+
+Some tools from the original instructions could not be used. The following alternatives were used instead, with the same end result.
+
+### 1. Docker Desktop → GitHub Codespaces
+Docker Desktop could not be installed on my machine due to organization policy restrictions.
+**Alternative:** All local development, Docker builds, and `kubectl`/`eksctl` commands were run inside **GitHub Codespaces**, which provides Docker in a cloud-based development environment.
+
+### 2. Travis CI → GitHub Actions
+Travis CI is no longer free and requires a paid plan or credit card verification.
+**Alternative:** The CI pipeline was implemented with **GitHub Actions** (`.github/workflows/docker-build-push.yml`), which is free for public repositories. It:
+- Triggers on every push to `main`
+- Builds all 4 Docker images (`reverseproxy`, `udagram-api-user`, `udagram-api-feed`, `udagram-frontend`)
+- Tags each image with a unique version (`v<run_number>`) and `latest`
+- Pushes the images to Docker Hub using credentials stored as GitHub repository secrets
+
+An equivalent `.travis.yml` is also included in the project root to show the same build-and-push steps. The CI screenshot shows the successful GitHub Actions run.
+
+### 3. EKS Cluster Creation → eksctl
+The EKS cluster and node group were created with **eksctl** (allowed in the project instructions appendix) instead of the AWS Console.
+
+### Deployment Files
+Kubernetes manifests are located in `udagram-deployment/`. Files containing credentials (`env-secret.yaml`, `aws-secret.yaml`) are excluded from the repository via `.gitignore`.
+
+### Screenshots
+All required screenshots are in the `screenshots/` folder.
